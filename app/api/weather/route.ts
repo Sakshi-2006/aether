@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
   const longitude = params.get('longitude')
   let lat = latitude
   let lon = longitude
-  let place = city || 'Delhi'
-  let country = 'India'
+  let place = city || params.get('name') || 'Weather location'
+  let country = params.get('country') || ''
   let timezone = 'auto'
 
   try {

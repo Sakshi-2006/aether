@@ -58,6 +58,7 @@ For a repeatable demo without network access, use the Python simulation endpoint
 - Search for cities worldwide and quick selection of saved example locations.
 - Toggle between Celsius and Fahrenheit for displayed temperatures.
 - Hourly temperature and precipitation-probability chart, plus a seven-day outlook.
+- Interactive Leaflet map showing the selected city and saved locations, with OpenStreetMap attribution.
 - Derived rain, heat, wind, and humidity notices with severity labels.
 - Export the seven-day forecast to CSV.
 - Friendly loading, invalid-city, and upstream-provider error states.
@@ -69,7 +70,7 @@ For a repeatable demo without network access, use the Python simulation endpoint
 | Option | Stack | Level | Expected result |
 | --- | --- | --- | --- |
 | A — Starter | Python, `urllib`/`requests`, JSON, `datetime`, terminal output | Beginner | One-city current conditions and threshold alerts |
-| B — Recommended | Python, FastAPI, `httpx`, SQLite, Next.js, Tailwind, Recharts | Intermediate | This project: documented API, live dashboard, caching, and CSV export |
+| B — Recommended | Python, FastAPI, `httpx`, SQLite, Next.js, Tailwind, Recharts, Leaflet | Intermediate | This project: documented API, live dashboard, caching, map, and CSV export |
 | C — Extended | Option B plus scheduled refresh, Docker, persistent database, AQI/maps, email or Telegram | Advanced | A deployable multi-location monitoring service |
 
 **Recommended for a student portfolio:** Option B. It demonstrates Python, API integration, validation, data handling, HTTP endpoints, visual communication, and documentation without requiring an API key or infrastructure account.
@@ -85,7 +86,9 @@ weather-forecast-alert-application/
 │   ├── requirements.txt         # Python dependencies
 │   └── .env.example             # Optional backend configuration
 ├── components/
-│   └── weather-dashboard.tsx    # Dashboard, chart, search, alerts, CSV export
+│   ├── weather-dashboard.tsx    # Dashboard, chart, search, alerts, CSV export
+│   ├── location-map.tsx         # Client-only map wrapper
+│   └── location-map-client.tsx  # Leaflet markers and OpenStreetMap tiles
 ├── public/                      # Static assets
 ├── README.md                    # Setup, architecture, portfolio, and interview guide
 ├── package.json                 # Next.js scripts/dependencies
@@ -176,7 +179,7 @@ The app uses real public data by default. To demonstrate the rule logic without 
 | Wind | A next-24-hour wind value is 50 km/h | Wind notice, moderate severity |
 | Humidity | Current relative humidity is 90% | Humidity notice |
 
-A useful next code change is to extract alert evaluation into a pure function and cover these cases with `pytest`. For production-like use, also test missing provider fields, invalid city names, provider timeouts, timezone boundaries, empty forecast arrays, and duplicate hourly timestamps. Keep the units explicit when comparing values: Open-Meteo is requested in °C, km/h, and millimeters here.
+The repository implements these scenarios at `GET /api/simulate?scenario=normal|rain|heat|wind`, and `backend/tests/test_alerts.py` verifies the threshold rules with Python's built-in `unittest` runner. Run the tests from `backend/` with `python -m unittest discover -s tests -v`. For production-like use, also test missing provider fields, invalid city names, provider timeouts, timezone boundaries, empty forecast arrays, and duplicate hourly timestamps. Keep units explicit when comparing values: Open-Meteo is requested in °C, km/h, and millimeters here.
 
 ## Reports and screenshots for a portfolio
 
@@ -185,10 +188,11 @@ Capture these after running the project with a real city:
 1. The repository tree showing `app/`, `backend/`, `components/`, and `README.md`.
 2. The dashboard's current-weather cards and selected city.
 3. The hourly chart and its tooltip at a visible hour.
-4. The seven-day outlook and at least one alert state (if conditions permit).
-5. The generated CSV opened in a spreadsheet or text editor.
-6. FastAPI's `/docs` page and one successful `/api/weather` response.
-7. The GitHub repository page with README rendered.
+4. The interactive map with the selected city and saved locations.
+5. The seven-day outlook and at least one alert state (if conditions permit).
+6. The generated CSV opened in a spreadsheet or text editor.
+7. FastAPI's `/docs` page and one successful `/api/weather` response.
+8. The GitHub repository page with README rendered.
 
 Save portfolio images in an `images/` directory and reference them with relative links, for example `![Weather dashboard](images/dashboard.png)`. Do not commit `.env`, API tokens, personal location history, or user data. This project does not require an API key.
 
@@ -226,7 +230,7 @@ Reasonable next steps:
 - Add a user-managed list of saved locations with a persistent database.
 - Add scheduled refresh and alert de-duplication before sending notifications.
 - Add air-quality metrics from a public provider, with a clearly stated source and units.
-- Add an interactive map using Leaflet or Mapbox and a legitimate weather tile layer.
+- Add additional map overlays only when a licensed, well-documented data source is available.
 - Add email/Telegram delivery using a secrets manager and per-user consent.
 - Add provider adapters and tests before supporting multiple weather services.
 - Containerize the FastAPI backend; schedule refreshes with cron or a managed scheduler.
